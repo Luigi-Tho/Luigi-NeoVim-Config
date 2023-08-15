@@ -57,7 +57,9 @@ require('lazy').setup({
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
+      -- 'p00f/clangd_extensions.nvim',
     },
+    conpletion = {callSnippet = "Replace"},
   },
 
   {
@@ -166,28 +168,39 @@ require('lazy').setup({
   --    up-to-date with whatever is in the kickstart repo.
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
---   {
---     "mason.nvim"
---   },
---   {  
---   "williamboman/mason.nvim",
---   opts = function(_, opts)
---     table.insert(opts.ensure_installed, "prettierd")
---   end,
---   },
---   {
---   "jose-elias-alvarez/null-ls.nvim",
---   opts = function(_, opts)
---     local nls = require("null-ls")
---     table.insert(opts.sources, nls.builtins.formatting.prettierd)
---   end,
---   },
-   -- { import = "lazyvim.plugins.extras.formatting.prettier" },
+
+  -- { import = "lazyvim.plugins.extras.formatting.prettier" },
+  -- {
+  --   'tzachar/cmp-tabnine',
+  --   build = './install.sh',
+  --   dependencies = 'hrsh7th/nvim-cmp',
+  -- },
+  -- {
+  --   'codota/tabnine-nvim',
+  --   build = "./dl_binaries.sh",
+  --   disable_auto_comment = true,
+  --   accept_keymap = "<Enter>",
+  --   dismiss_keymap = "<C-]>",
+  --   debounce_ms = 800,
+  --   suggestion_color = {gui = "#808080", cterm = 244},
+  --   exclude_filetypes = {"TelescopePrompt"},
+  --   log_file_path = nil,
+  -- },
   {
-    'tzachar/cmp-tabnine',
-    build = './install.sh',
-    dependencies = 'hrsh7th/nvim-cmp',
- },
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+      "MunifTanjim/nui.nvim",
+    }
+  },
+  -- {
+  --   'p00f/clangd_extensions.nvim'
+  -- },
+  {
+    'ranjithshegde/ccls.nvim'
+  },
    { import = 'custom.plugins' },
  }, {})
 
@@ -220,6 +233,12 @@ vim.o.undofile = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 
+-- Colorscheme
+vim.api.nvim_cmd({
+  cmd = 'colorscheme',
+  args = {'habamax'}
+}, {})
+
 -- Keep signcolumn on by default
 vim.wo.signcolumn = 'yes'
 
@@ -229,7 +248,7 @@ vim.o.timeout = true
 vim.o.timeoutlen = 300
 
 -- Set completeopt to have a better completion experience
-vim.o.completeopt = 'menuone,noselect'
+vim.o.completeopt = "menu,menuone,noselect"
 
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
@@ -412,7 +431,7 @@ end
 --  Add any additional override configuration in the following tables. They will be passed to
 --  the `settings` field of the server config. You must look up that documentation yourself.
 local servers = {
-  -- clangd = {},
+  clangd = {},
   -- gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
@@ -425,6 +444,39 @@ local servers = {
     },
   },
 }
+
+local ccls = require("ccls")
+ccls.setup({
+  defaults = {
+    win_config = {
+        -- Sidebar configuration
+        sidebar = {
+            size = 50,
+            position = "topleft",
+            split = "vnew",
+            width = 50,
+            height = 20,
+        },
+        -- floating window configuration. check :help nvim_open_win for options
+        float = {
+            style = "minimal",
+            relative = "cursor",
+            width = 50,
+            height = 20,
+            row = 0,
+            col = 0,
+            border = "rounded",
+        },
+    },
+    filetypes = {"c", "cpp", "objc", "objcpp"},
+
+    -- Lsp is not setup by default to avoid overriding user's personal configurations.
+    -- Look ahead for instructions on using this plugin for ccls setup
+    lsp = {
+      use_defaults = true
+    }
+ },
+})
 
 -- Setup neovim lua configuration
 require('neodev').setup()
@@ -493,7 +545,9 @@ cmp.setup {
     end, { 'i', 's' }),
   },
   sources = {
+    { name = 'path' },
     { name = 'nvim_lsp' },
+    { name = 'buffer', keyword_length = 2},
     { name = 'luasnip' },
   },
 }
