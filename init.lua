@@ -57,7 +57,7 @@ require('lazy').setup({
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
-      -- 'p00f/clangd_extensions.nvim',
+      'golang/tools',
     },
     conpletion = {callSnippet = "Replace"},
   },
@@ -132,7 +132,9 @@ require('lazy').setup({
   { 
     'nvim-telescope/telescope.nvim',
     branch = '0.1.x',
-    dependencies = { 'nvim-lua/plenary.nvim' }
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+    },
   },
 
   -- Fuzzy Finder Algorithm which requires local dependencies to be built.
@@ -200,6 +202,12 @@ require('lazy').setup({
   -- },
   {
     'ranjithshegde/ccls.nvim'
+  },
+  {
+    "sopa0/telescope-makefile",
+    dependencies = {
+      "akinsho/toggleterm.nvim",
+    }
   },
    { import = 'custom.plugins' },
  }, {})
@@ -286,6 +294,9 @@ require('telescope').setup {
     },
   },
 }
+
+
+require('telescope').load_extension('make')
 
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
@@ -432,7 +443,7 @@ end
 --  the `settings` field of the server config. You must look up that documentation yourself.
 local servers = {
   clangd = {},
-  -- gopls = {},
+  gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
   -- tsserver = {},
