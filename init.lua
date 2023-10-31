@@ -285,6 +285,9 @@ vim.o.completeopt = "menu,menuone,noselect"
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
 
+--  makes line numbers relative
+vim.wo.relativenumber = true;
+
 -- [[ Basic Keymaps ]]
 
 -- Keymaps for better default experience
