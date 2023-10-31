@@ -48,7 +48,9 @@ require('lazy').setup({
     'neovim/nvim-lspconfig',
     dependencies = {
       -- Automatically install LSPs to stdpath for neovim
-      { 'williamboman/mason.nvim', config = true },
+      { 'williamboman/mason.nvim',
+        config = true,
+      },
       'williamboman/mason-lspconfig.nvim',
 
       -- Useful status updates for LSP
@@ -172,21 +174,14 @@ require('lazy').setup({
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
 
   -- { import = "lazyvim.plugins.extras.formatting.prettier" },
-  -- {
-  --   'tzachar/cmp-tabnine',
-  --   build = './install.sh',
-  --   dependencies = 'hrsh7th/nvim-cmp',
-  -- },
+  {
+    'tzachar/cmp-tabnine',
+    build = './install.sh',
+    dependencies = 'hrsh7th/nvim-cmp',
+  },
   -- {
   --   'codota/tabnine-nvim',
   --   build = "./dl_binaries.sh",
-  --   disable_auto_comment = true,
-  --   accept_keymap = "<Enter>",
-  --   dismiss_keymap = "<C-]>",
-  --   debounce_ms = 800,
-  --   suggestion_color = {gui = "#808080", cterm = 244},
-  --   exclude_filetypes = {"TelescopePrompt"},
-  --   log_file_path = nil,
   -- },
   {
     "nvim-neo-tree/neo-tree.nvim",
@@ -209,6 +204,34 @@ require('lazy').setup({
       "akinsho/toggleterm.nvim",
     }
   },
+  {
+    'ThePrimeagen/harpoon'
+  },
+  {
+    'mfussenegger/nvim-dap',
+    dependencies = {
+      'vadimcn/codelldb',
+      'williamboman/mason.nvim'
+    }
+  },
+  {
+    'williamboman/mason.nvim',
+    opts = {
+      ensure_installed = {
+        "clangd",
+        "clang-format";
+        "codelldb"
+      }
+    }
+  },
+  {
+    "jay-babu/mason-nvim-dap.nvim",
+    dependencies = {
+      "williamboman/mason.nvim",
+      "mfussenegger/nvim-dap",
+    }
+  },
+  {"ThePrimeagen/vim-be-good"},
    { import = 'custom.plugins' },
  }, {})
 
@@ -216,6 +239,7 @@ require('lazy').setup({
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
 vim.o.tabstop = 4
+vim.o.shiftwidth = 4
 
 -- Set highlight on search
 vim.o.hlsearch = false
@@ -294,7 +318,6 @@ require('telescope').setup {
     },
   },
 }
-
 
 require('telescope').load_extension('make')
 
@@ -494,7 +517,7 @@ require('neodev').setup()
 
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities) -- i don't think lazy-nvim likes that it passes a table to this function
 
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
@@ -560,8 +583,102 @@ cmp.setup {
     { name = 'nvim_lsp' },
     { name = 'buffer', keyword_length = 2},
     { name = 'luasnip' },
+    { name = 'cmp_tabnine' },
   },
 }
+
+-- [[Configure Mason]]
+require('mason').setup({
+  opts = {
+    ensure_installed = {
+      "clangd",
+      "clang-format",
+      "codelldb"
+    }
+  }
+})
+
+-- [[Configure Mason-DAP]]
+require("mason-nvim-dap").setup({
+  event = "VeryLazy",
+  ensure_installed = {
+    "coldelldb",
+  }
+})
+
+
+-- [[Configure Harpoon]]
+require("harpoon").setup({
+  vim.keymap.set("n", "<leader>hp", function () require("harpoon.ui").toggle_quick_menu() end, {desc = "[h]ar[p]oon quick menu"}),
+  vim.keymap.set("n", "<leader>hpm", function () require("harpoon.mark").add_file() end, {desc = "[h]ar[p]oon [M]ark file"}),
+  vim.keymap.set("n", "<leader>t", function () require("harpoon.term").gotoTerminal(1) end, {desc = "go to [t]erminal"}),
+})
+
+-- [[Configure DAP]] -- Not finished
+local dap = require('dap')
+dap.adapters.codelldb = {
+  type = 'server',
+  host = '127.0.0.1',
+  port = '13000'
+}
+dap.configurations.cpp = {{
+    name = 'Launch',
+    type = 'lldb',
+    request = 'launch',
+    program = function()
+      return vim.fn.input({'Path to executable: ', vim.fn.getcwd() .. '/', 'file'})
+    end,
+    cwd = '${workspaceFolder}',
+    stopOnEntry = false,
+    args = {},
+  },
+}
+
+-- If you want to use this for Rust and C, add something like this:
+
+dap.configurations.c = dap.configurations.cpp
+dap.configurations.rust = dap.configurations.cpp
+
+vim.keymap.set('n', '<F5>', function() dap.continue() end)
+-- vim.keymap.set('n', '<F10>', function() require('dap').step_over() end)
+-- vim.keymap.set('n', '<F11>', function() require('dap').step_into() end)
+-- vim.keymap.set('n', '<F12>', function() require('dap').step_out() end)
+vim.keymap.set('n', '<Leader>b', function() require('dap').toggle_breakpoint() end)
+-- vim.keymap.set('n', '<Leader>B', function() require('dap').set_breakpoint() end)
+-- vim.keymap.set('n', '<Leader>lp', function() require('dap').set_breakpoint(nil, nil, vim.fn.input('Log point message: ')) end)
+vim.keymap.set('n', '<Leader>dr', function() require('dap').repl.open() end)
+-- vim.keymap.set('n', '<Leader>dl', function() require('dap').run_last() end)
+-- vim.keymap.set({'n', 'v'}, '<Leader>dh', function()
+--   require('dap.ui.widgets').hover()
+-- end)
+-- vim.keymap.set({'n', 'v'}, '<Leader>dp', function()
+--   require('dap.ui.widgets').preview()
+-- end)
+-- vim.keymap.set('n', '<Leader>df', function()
+--   local widgets = require('dap.ui.widgets')
+--   widgets.centered_float(widgets.frames)
+-- end)
+-- vim.keymap.set('n', '<Leader>ds', function()
+--   local widgets = require('dap.ui.widgets')
+--   widgets.centered_float(widgets.scopes)
+-- end)
+
+-- [[Configure Tabnine]]
+require('cmp_tabnine.config'):setup({
+	max_lines = 1000,
+	max_num_results = 20,
+	sort = true,
+	run_on_every_keystroke = true,
+	snippet_placeholder = '..',
+	ignored_file_types = {
+		-- default is not to ignore
+		-- uncomment to ignore in lua:
+		-- lua = true
+	},
+	show_prediction_strength = false,
+  vim.api.nvim_set_hl(0, "CmpItemKindTabNine", {fg ="#6CC644"})
+})
+
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
