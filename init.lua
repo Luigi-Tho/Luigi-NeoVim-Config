@@ -232,6 +232,14 @@ require('lazy').setup({
     }
   },
   {"ThePrimeagen/vim-be-good"},
+  {"christoomey/vim-tmux-navigator",
+    -- TODO: add keybindings to use C-h,j,k,l for navigating windows
+  },
+  {
+    "catppuccin/nvim",
+    name = "catppuccin",
+    priority = 1000;
+  },
    { import = 'custom.plugins' },
  }, {})
 
@@ -268,7 +276,7 @@ vim.o.smartcase = true
 -- Colorscheme
 vim.api.nvim_cmd({
   cmd = 'colorscheme',
-  args = {'habamax'}
+  args = {'catppuccin-macchiato'}
 }, {})
 
 -- Keep signcolumn on by default
@@ -338,8 +346,8 @@ vim.keymap.set('n', '<leader>/', function()
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
-vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
-vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
+vim.keymap.set('n', 'F', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
+vim.keymap.set('n', 'f', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
@@ -681,7 +689,6 @@ require('cmp_tabnine.config'):setup({
 	show_prediction_strength = false,
   vim.api.nvim_set_hl(0, "CmpItemKindTabNine", {fg ="#6CC644"})
 })
-
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
