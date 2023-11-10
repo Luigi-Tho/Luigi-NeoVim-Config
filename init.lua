@@ -121,9 +121,10 @@ require('lazy').setup({
     'lukas-reineke/indent-blankline.nvim',
     -- Enable `lukas-reineke/indent-blankline.nvim`
     -- See `:help indent_blankline.txt`
+    main = 'ibl',
     opts = {
-      char = '┊',
-      show_trailing_blankline_indent = false,
+      indent = {char = '┊'},
+      whitespace = {remove_blankline_trail = false},
     },
   },
 
@@ -239,6 +240,35 @@ require('lazy').setup({
     "catppuccin/nvim",
     name = "catppuccin",
     priority = 1000;
+  },
+  {
+    "nvim-treesitter/nvim-treesitter-context"
+  },
+  {
+    -- TODO: get this working
+    "epwalsh/obsidian.nvim",
+    lazy = true,
+    event = {
+      -- If you want to use the home shortcut '~' here you need to call 'vim.fn.expand'.
+      -- E.g. "BufReadPre " .. vim.fn.expand "~" .. "/my-vault/**.md"
+      "BufReadPre /Users/luigi_tho/My Drive (raenaa@umich.edu)/School Vault/**.md",
+      "BufNewFile /Users/luigi_tho/My Drive (raenaa@umich.edu)/School Vault/**.md",
+    },
+    dependencies = {
+      -- Required.
+      "nvim-lua/plenary.nvim",
+    },
+    opts = {
+    },
+  },
+  {
+    "oflisback/obsidian-bridge.nvim",
+    config = function() require("obsidian-bridge").setup() end,
+    event = {
+      "BufReadPre *.md",
+      "BufNewFile *.md",
+    },
+    lazy = true,
   },
    { import = 'custom.plugins' },
  }, {})
@@ -478,6 +508,7 @@ end
 local servers = {
   clangd = {},
   gopls = {},
+  omnisharp = {},
   -- pyright = {},
   -- rust_analyzer = {},
   -- tsserver = {},
@@ -570,24 +601,24 @@ cmp.setup {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
-    ['<Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_locally_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-    ['<S-Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.locally_jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
+    -- ['<Tab>'] = cmp.mapping(function(fallback)
+    --   if cmp.visible() then
+    --     cmp.select_next_item()
+    --   elseif luasnip.expand_or_locally_jumpable() then
+    --     luasnip.expand_or_jump()
+    --   else
+    --     fallback()
+    --   end
+    -- end, { 'i', 's' }),
+    -- ['<S-Tab>'] = cmp.mapping(function(fallback)
+    --   if cmp.visible() then
+    --     cmp.select_prev_item()
+    --   elseif luasnip.locally_jumpable(-1) then
+    --     luasnip.jump(-1)
+    --   else
+    --     fallback()
+    --   end
+    -- end, { 'i', 's' }),
   },
   sources = {
     { name = 'path' },
