@@ -1,0 +1,1 @@
+remapped telescope to default. added neotree and terminal keymaps. remapped ^ and $ to H and L. added dapui and vscode folder support to dap. finished c++ debugging support (codelldb). added todo-comments.

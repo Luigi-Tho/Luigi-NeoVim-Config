@@ -270,6 +270,20 @@ require('lazy').setup({
     },
     lazy = true,
   },
+  {
+    "folke/todo-comments.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "BurntSushi/ripgrep"
+  },
+    opts = {}
+  },
+  {
+    "rcarriga/nvim-dap-ui",
+    dependencies = {
+      "mfussenegger/nvim-dap"
+    }
+  },
    { import = 'custom.plugins' },
  }, {})
 
@@ -376,8 +390,8 @@ vim.keymap.set('n', '<leader>/', function()
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
-vim.keymap.set('n', 'F', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
-vim.keymap.set('n', 'f', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
+vim.keymap.set('n', '<leader>sg', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
+vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
@@ -644,7 +658,7 @@ require('mason').setup({
 require("mason-nvim-dap").setup({
   event = "VeryLazy",
   ensure_installed = {
-    "coldelldb",
+    "codelldb"
   }
 })
 
@@ -656,54 +670,72 @@ require("harpoon").setup({
   vim.keymap.set("n", "<leader>t", function () require("harpoon.term").gotoTerminal(1) end, {desc = "go to [t]erminal"}),
 })
 
--- [[Configure DAP]] -- Not finished
+-- [[Configure DAP, DAP-UI]]
 local dap = require('dap')
+local dapui = require("dapui")
+
+dap.set_log_level("DEBUG")
 dap.adapters.codelldb = {
   type = 'server',
   host = '127.0.0.1',
-  port = '13000'
+  port = "${port}",
+  executable = {
+    command = "/Users/luigi_tho/.local/share/nvim/mason/packages/codelldb/codelldb",
+    args = {"--port", "${port}"},
+  }
 }
 dap.configurations.cpp = {{
     name = 'Launch',
-    type = 'lldb',
+    type = 'codelldb',
     request = 'launch',
     program = function()
-      return vim.fn.input({'Path to executable: ', vim.fn.getcwd() .. '/', 'file'})
+      local executable = vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+      -- local input_file = vim.fn.input('Path to input file: ', vim.fn.getcwd() .. '/', 'file')
+      -- return "bash -c '" .. executable .. "<" .. input_file .. "'"
+      return executable
     end,
     cwd = '${workspaceFolder}',
     stopOnEntry = false,
-    args = {},
+    args = {"puzzle.txt"},
   },
 }
 
--- If you want to use this for Rust and C, add something like this:
-
 dap.configurations.c = dap.configurations.cpp
 dap.configurations.rust = dap.configurations.cpp
+require('dap.ext.vscode').load_launchjs(nil, {})
+dapui.setup()
 
-vim.keymap.set('n', '<F5>', function() dap.continue() end)
--- vim.keymap.set('n', '<F10>', function() require('dap').step_over() end)
--- vim.keymap.set('n', '<F11>', function() require('dap').step_into() end)
--- vim.keymap.set('n', '<F12>', function() require('dap').step_out() end)
+dap.listeners.after.event_initialized["dapui_config"] = function() dapui.open() end
+dap.listeners.before.event_terminated["dapui_config"] = function() dapui.close() end
+dap.listeners.before.event_exited["dapui_config"] = function() dapui.close() end
+
+
+vim.keymap.set('n', '<F5>', function()
+  dap.continue()
+end)
+vim.keymap.set('n', '<F10>', function() require('dap').step_over() end)
+vim.keymap.set('n', '<F11>', function() require('dap').step_into() end)
+vim.keymap.set('n', '<F12>', function() require('dap').step_out() end)
+vim.keymap.set('n', '<S-F5>', function() require'dap'.disconnect({ terminateDebuggee = true }) end)
 vim.keymap.set('n', '<Leader>b', function() require('dap').toggle_breakpoint() end)
--- vim.keymap.set('n', '<Leader>B', function() require('dap').set_breakpoint() end)
--- vim.keymap.set('n', '<Leader>lp', function() require('dap').set_breakpoint(nil, nil, vim.fn.input('Log point message: ')) end)
+vim.keymap.set('n', '<Leader>B', function() require('dap').set_breakpoint() end)
+vim.keymap.set('n', '<Leader>lp', function() require('dap').set_breakpoint(nil, nil, vim.fn.input('Log point message: ')) end)
 vim.keymap.set('n', '<Leader>dr', function() require('dap').repl.open() end)
--- vim.keymap.set('n', '<Leader>dl', function() require('dap').run_last() end)
--- vim.keymap.set({'n', 'v'}, '<Leader>dh', function()
---   require('dap.ui.widgets').hover()
--- end)
--- vim.keymap.set({'n', 'v'}, '<Leader>dp', function()
---   require('dap.ui.widgets').preview()
--- end)
--- vim.keymap.set('n', '<Leader>df', function()
---   local widgets = require('dap.ui.widgets')
---   widgets.centered_float(widgets.frames)
--- end)
--- vim.keymap.set('n', '<Leader>ds', function()
---   local widgets = require('dap.ui.widgets')
---   widgets.centered_float(widgets.scopes)
--- end)
+vim.keymap.set('n', '<Leader>dl', function() require('dap').run_last() end)
+vim.keymap.set({'n', 'v'}, '<Leader>dh', function()
+  require('dap.ui.widgets').hover()
+end)
+vim.keymap.set({'n', 'v'}, '<Leader>dp', function()
+  require('dap.ui.widgets').preview()
+end)
+vim.keymap.set('n', '<Leader>df', function()
+  local widgets = require('dap.ui.widgets')
+  widgets.centered_float(widgets.frames)
+end)
+vim.keymap.set('n', '<Leader>ds', function()
+  local widgets = require('dap.ui.widgets')
+  widgets.centered_float(widgets.scopes)
+end)
 
 -- [[Configure Tabnine]]
 require('cmp_tabnine.config'):setup({
@@ -721,5 +753,10 @@ require('cmp_tabnine.config'):setup({
   vim.api.nvim_set_hl(0, "CmpItemKindTabNine", {fg ="#6CC644"})
 })
 
+-- [[Other COnfigurations and Mappings]]
+vim.keymap.set('n', "<leader>t", "<cmd>tabnew<cr><cmd>term<cr>")
+vim.keymap.set('n', "<leader>nt", "<cmd>Neotree<cr>")
+vim.keymap.set('n', "H", '^');
+vim.keymap.set('n', "L", '$');
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
