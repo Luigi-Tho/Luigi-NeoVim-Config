@@ -48,9 +48,17 @@ require('lazy').setup({
     'neovim/nvim-lspconfig',
     dependencies = {
       -- Automatically install LSPs to stdpath for neovim
-      { 'williamboman/mason.nvim',
+      {
+        'williamboman/mason.nvim',
         config = true,
-      },
+        opts = {
+          ensure_installed = {
+            "clangd",
+            "clang-format";
+            "codelldb"
+          }
+        }
+        },
       'williamboman/mason-lspconfig.nvim',
 
       -- Useful status updates for LSP
@@ -162,69 +170,12 @@ require('lazy').setup({
     build = ':TSUpdate',
   },
 
-  -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
-  --       These are some example plugins that I've included in the kickstart repository.
-  --       Uncomment any of the lines below to enable them.
   -- require 'kickstart.plugins.autoformat',
   -- require 'kickstart.plugins.debug',
 
-  -- NOTE: The import below automatically adds your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
-  --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
-  --    up-to-date with whatever is in the kickstart repo.
-  --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
-
-  -- { import = "lazyvim.plugins.extras.formatting.prettier" },
-  {
-    'tzachar/cmp-tabnine',
-    build = './install.sh',
-    dependencies = 'hrsh7th/nvim-cmp',
-  },
-  -- {
-  --   'codota/tabnine-nvim',
-  --   build = "./dl_binaries.sh",
-  -- },
-  {
-    "nvim-neo-tree/neo-tree.nvim",
-    branch = "v3.x",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
-      "MunifTanjim/nui.nvim",
-    }
-  },
-  -- {
-  --   'p00f/clangd_extensions.nvim'
-  -- },
-  {
-    'ranjithshegde/ccls.nvim'
-  },
-  {
-    "sopa0/telescope-makefile",
-    dependencies = {
-      "akinsho/toggleterm.nvim",
-    }
-  },
-  {
-    'ThePrimeagen/harpoon'
-  },
-  {
-    'mfussenegger/nvim-dap',
-    dependencies = {
-      'vadimcn/codelldb',
-      'williamboman/mason.nvim'
-    }
-  },
-  {
-    'williamboman/mason.nvim',
-    opts = {
-      ensure_installed = {
-        "clangd",
-        "clang-format";
-        "codelldb"
-      }
-    }
-  },
+  --
+  --    [[Custom Plugins]]
   {
     "jay-babu/mason-nvim-dap.nvim",
     dependencies = {
@@ -243,46 +194,6 @@ require('lazy').setup({
   },
   {
     "nvim-treesitter/nvim-treesitter-context"
-  },
-  {
-    -- TODO: get this working
-    "epwalsh/obsidian.nvim",
-    lazy = true,
-    event = {
-      -- If you want to use the home shortcut '~' here you need to call 'vim.fn.expand'.
-      -- E.g. "BufReadPre " .. vim.fn.expand "~" .. "/my-vault/**.md"
-      "BufReadPre /Users/luigi_tho/My Drive (raenaa@umich.edu)/School Vault/**.md",
-      "BufNewFile /Users/luigi_tho/My Drive (raenaa@umich.edu)/School Vault/**.md",
-    },
-    dependencies = {
-      -- Required.
-      "nvim-lua/plenary.nvim",
-    },
-    opts = {
-    },
-  },
-  {
-    "oflisback/obsidian-bridge.nvim",
-    config = function() require("obsidian-bridge").setup() end,
-    event = {
-      "BufReadPre *.md",
-      "BufNewFile *.md",
-    },
-    lazy = true,
-  },
-  {
-    "folke/todo-comments.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "BurntSushi/ripgrep"
-  },
-    opts = {}
-  },
-  {
-    "rcarriga/nvim-dap-ui",
-    dependencies = {
-      "mfussenegger/nvim-dap"
-    }
   },
    { import = 'custom.plugins' },
  }, {})
@@ -401,7 +312,7 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { de
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
+  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim', 'markdown', 'markdown_inline', 'html', 'javascript'},
 
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
   auto_install = false,
@@ -463,6 +374,9 @@ require('nvim-treesitter.configs').setup {
   },
 }
 
+-- local ft_to_parser = require('nvim-treesitter.parsers').filetype_to_parsername
+-- ft_to_parser.ejs = "html"
+
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
@@ -523,9 +437,9 @@ local servers = {
   clangd = {},
   gopls = {},
   omnisharp = {},
-  -- pyright = {},
+  pyright = {},
   -- rust_analyzer = {},
-  -- tsserver = {},
+  tsserver = {},
 
   lua_ls = {
     Lua = {
@@ -534,39 +448,6 @@ local servers = {
     },
   },
 }
-
-local ccls = require("ccls")
-ccls.setup({
-  defaults = {
-    win_config = {
-        -- Sidebar configuration
-        sidebar = {
-            size = 50,
-            position = "topleft",
-            split = "vnew",
-            width = 50,
-            height = 20,
-        },
-        -- floating window configuration. check :help nvim_open_win for options
-        float = {
-            style = "minimal",
-            relative = "cursor",
-            width = 50,
-            height = 20,
-            row = 0,
-            col = 0,
-            border = "rounded",
-        },
-    },
-    filetypes = {"c", "cpp", "objc", "objcpp"},
-
-    -- Lsp is not setup by default to avoid overriding user's personal configurations.
-    -- Look ahead for instructions on using this plugin for ccls setup
-    lsp = {
-      use_defaults = true
-    }
- },
-})
 
 -- Setup neovim lua configuration
 require('neodev').setup()
@@ -649,7 +530,7 @@ require('mason').setup({
     ensure_installed = {
       "clangd",
       "clang-format",
-      "codelldb"
+      "codelldb",
     }
   }
 })
@@ -662,101 +543,35 @@ require("mason-nvim-dap").setup({
   }
 })
 
-
--- [[Configure Harpoon]]
-require("harpoon").setup({
-  vim.keymap.set("n", "<leader>hp", function () require("harpoon.ui").toggle_quick_menu() end, {desc = "[h]ar[p]oon quick menu"}),
-  vim.keymap.set("n", "<leader>hpm", function () require("harpoon.mark").add_file() end, {desc = "[h]ar[p]oon [M]ark file"}),
-  vim.keymap.set("n", "<leader>t", function () require("harpoon.term").gotoTerminal(1) end, {desc = "go to [t]erminal"}),
-})
-
--- [[Configure DAP, DAP-UI]]
-local dap = require('dap')
-local dapui = require("dapui")
-
-dap.set_log_level("DEBUG")
-dap.adapters.codelldb = {
-  type = 'server',
-  host = '127.0.0.1',
-  port = "${port}",
-  executable = {
-    command = "/Users/luigi_tho/.local/share/nvim/mason/packages/codelldb/codelldb",
-    args = {"--port", "${port}"},
-  }
-}
-dap.configurations.cpp = {{
-    name = 'Launch',
-    type = 'codelldb',
-    request = 'launch',
-    program = function()
-      local executable = vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
-      -- local input_file = vim.fn.input('Path to input file: ', vim.fn.getcwd() .. '/', 'file')
-      -- return "bash -c '" .. executable .. "<" .. input_file .. "'"
-      return executable
-    end,
-    cwd = '${workspaceFolder}',
-    stopOnEntry = false,
-    args = {"puzzle.txt"},
-  },
-}
-
-dap.configurations.c = dap.configurations.cpp
-dap.configurations.rust = dap.configurations.cpp
-require('dap.ext.vscode').load_launchjs(nil, {})
-dapui.setup()
-
-dap.listeners.after.event_initialized["dapui_config"] = function() dapui.open() end
-dap.listeners.before.event_terminated["dapui_config"] = function() dapui.close() end
-dap.listeners.before.event_exited["dapui_config"] = function() dapui.close() end
-
-
-vim.keymap.set('n', '<F5>', function()
-  dap.continue()
-end)
-vim.keymap.set('n', '<F10>', function() require('dap').step_over() end)
-vim.keymap.set('n', '<F11>', function() require('dap').step_into() end)
-vim.keymap.set('n', '<F12>', function() require('dap').step_out() end)
-vim.keymap.set('n', '<S-F5>', function() require'dap'.disconnect({ terminateDebuggee = true }) end)
-vim.keymap.set('n', '<Leader>b', function() require('dap').toggle_breakpoint() end)
-vim.keymap.set('n', '<Leader>B', function() require('dap').set_breakpoint() end)
-vim.keymap.set('n', '<Leader>lp', function() require('dap').set_breakpoint(nil, nil, vim.fn.input('Log point message: ')) end)
-vim.keymap.set('n', '<Leader>dr', function() require('dap').repl.open() end)
-vim.keymap.set('n', '<Leader>dl', function() require('dap').run_last() end)
-vim.keymap.set({'n', 'v'}, '<Leader>dh', function()
-  require('dap.ui.widgets').hover()
-end)
-vim.keymap.set({'n', 'v'}, '<Leader>dp', function()
-  require('dap.ui.widgets').preview()
-end)
-vim.keymap.set('n', '<Leader>df', function()
-  local widgets = require('dap.ui.widgets')
-  widgets.centered_float(widgets.frames)
-end)
-vim.keymap.set('n', '<Leader>ds', function()
-  local widgets = require('dap.ui.widgets')
-  widgets.centered_float(widgets.scopes)
-end)
-
--- [[Configure Tabnine]]
-require('cmp_tabnine.config'):setup({
-	max_lines = 1000,
-	max_num_results = 20,
-	sort = true,
-	run_on_every_keystroke = true,
-	snippet_placeholder = '..',
-	ignored_file_types = {
-		-- default is not to ignore
-		-- uncomment to ignore in lua:
-		-- lua = true
-	},
-	show_prediction_strength = false,
-  vim.api.nvim_set_hl(0, "CmpItemKindTabNine", {fg ="#6CC644"})
-})
-
 -- [[Other COnfigurations and Mappings]]
 vim.keymap.set('n', "<leader>t", "<cmd>tabnew<cr><cmd>term<cr>")
-vim.keymap.set('n', "<leader>nt", "<cmd>Neotree<cr>")
 vim.keymap.set('n', "H", '^');
 vim.keymap.set('n', "L", '$');
+vim.keymap.set("n", "gf", function()
+  if require("obsidian").util.cursor_on_markdown_link() then
+    return "<cmd>ObsidianFollowLink<CR>"
+  else
+    return "gf"
+  end
+end, { noremap = false, expr = true })
+vim.keymap.set('n', '<leader>so', "<cmd>ObsidianQuickSwitch<cr>")
+vim.api.nvim_create_autocmd("BufRead", {
+	pattern = "*.md",
+	callback = function()
+		local lspconfig = require('lspconfig')
+		local configs = require('lspconfig.configs')
+		if not configs.obsidian then
+			configs.obsidian = {
+				default_config = {
+					cmd = { "npx", "obsidian-lsp", "--", "--stdio" },
+					single_file_support = false,
+					root_dir = lspconfig.util.root_pattern ".obsidian",
+					filetypes = { 'markdown' },
+				},
+			}
+		end
+		lspconfig.obsidian.setup {}
+	end,
+})
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
