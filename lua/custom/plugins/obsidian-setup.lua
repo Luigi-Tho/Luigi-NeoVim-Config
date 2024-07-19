@@ -51,6 +51,9 @@ return {
 	    prepend_note_id = true,
 	    prepend_note_path = false,
 	  },
+	  attachments = {
+	    img_folder = "Image Bank",
+	  },
 	  templates = {
 	    subdir = "99 Templates",
 	    date_format = "%d-%m-$Y",

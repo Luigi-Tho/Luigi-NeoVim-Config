@@ -54,8 +54,9 @@ require('lazy').setup({
         opts = {
           ensure_installed = {
             "clangd",
-            "clang-format";
-            "codelldb"
+            "clang-format",
+            "codelldb",
+            "js-debug-adapter"
           }
         }
         },
@@ -193,6 +194,11 @@ require('lazy').setup({
     priority = 1000;
   },
   {
+    "ellisonleao/gruvbox.nvim",
+    priority = 1000,
+    config = true,
+  },
+  {
     "nvim-treesitter/nvim-treesitter-context"
   },
    { import = 'custom.plugins' },
@@ -229,10 +235,12 @@ vim.o.ignorecase = true
 vim.o.smartcase = true
 
 -- Colorscheme
-vim.api.nvim_cmd({
-  cmd = 'colorscheme',
-  args = {'catppuccin-macchiato'}
-}, {})
+-- vim.api.nvim_cmd({
+--   cmd = 'colorscheme',
+--   args = {'catppuccin-macchiato'}
+-- }, {})
+vim.o.background = 'dark'
+vim.cmd([[colorscheme gruvbox]])
 
 -- Keep signcolumn on by default
 vim.wo.signcolumn = 'yes'
@@ -250,6 +258,8 @@ vim.o.termguicolors = true
 
 --  makes line numbers relative
 vim.wo.relativenumber = true;
+
+vim.o.scrolloff = 3;
 
 -- [[ Basic Keymaps ]]
 
@@ -307,6 +317,7 @@ vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
+vim.keymap.set('n', '<leader>sF', require('telescope.builtin').oldfiles, { desc = '[S]earch Old [F]iles'})
 
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
@@ -441,7 +452,7 @@ local servers = {
   -- rust_analyzer = {},
   tsserver = {},
 
-  lua_ls = {
+lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
       telemetry = { enable = false },
@@ -543,8 +554,8 @@ require("mason-nvim-dap").setup({
   }
 })
 
--- [[Other COnfigurations and Mappings]]
-vim.keymap.set('n', "<leader>t", "<cmd>tabnew<cr><cmd>term<cr>")
+-- [[Other Configurations and Mappings]]
+-- vim.keymap.set('n', "<leader>t", "<cmd>tabnew<cr><cmd>term<cr>")
 vim.keymap.set('n', "H", '^');
 vim.keymap.set('n', "L", '$');
 vim.keymap.set("n", "gf", function()
