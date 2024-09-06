@@ -29,6 +29,7 @@ return {
     config = function()
 	local obs = require('obsidian')
 	obs.setup({
+	  ui = {enable = false},
 	  detect_cwd = false,
 	  open_notes_in = "vsplit",
 	  finder = "telescope.nvim",

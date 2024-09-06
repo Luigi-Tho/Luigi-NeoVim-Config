@@ -235,12 +235,12 @@ vim.o.ignorecase = true
 vim.o.smartcase = true
 
 -- Colorscheme
--- vim.api.nvim_cmd({
---   cmd = 'colorscheme',
---   args = {'catppuccin-macchiato'}
--- }, {})
-vim.o.background = 'dark'
-vim.cmd([[colorscheme gruvbox]])
+vim.api.nvim_cmd({
+  cmd = 'colorscheme',
+  args = {'catppuccin-mocha'}
+}, {})
+-- vim.o.background = 'dark'
+-- vim.cmd([[colorscheme gruvbox]])
 
 -- Keep signcolumn on by default
 vim.wo.signcolumn = 'yes'
