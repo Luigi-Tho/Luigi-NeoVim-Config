@@ -1,8 +1,0 @@
-{
-  "solution": {
-    "path": "Solution\\ProjectAndSolutionFilter.sln",
-    "projects": [
-      "..\\Project\\ProjectAndSolutionFilter.csproj"
-    ]
-  }
-}
